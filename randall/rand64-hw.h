@@ -1,4 +1,7 @@
-#include <cpuid.h>
+#ifndef RAND64HW_H
+#define RAND64HW_H
+
+// #include <cpuid.h>
 
 struct cpuid
 cpuid (unsigned int leaf, unsigned int subleaf);
@@ -14,3 +17,5 @@ hardware_rand64 (void);
 
 void
 hardware_rand64_fini (void);
+
+#endif /* RAND64HW_H */

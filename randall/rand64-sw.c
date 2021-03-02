@@ -1,13 +1,13 @@
 /* Software implementation.  */
 
 /* Input stream containing random bytes.  */
-static FILE *urandstream;
+FILE *urandstream;
 
 /* Initialize the software rand64 implementation.  */
 void
-software_rand64_init (void)
+software_rand64_init (char* filename)
 {
-  urandstream = fopen ("/dev/random", "r");
+  urandstream = fopen (filename, "r");
   if (! urandstream)
     abort ();
 }

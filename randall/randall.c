@@ -28,12 +28,14 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 
-#include "./rand64-hw.h"
-#include "./options.h"
-#include "./output.h"
-#include "./rand64-sw.h"
+#include "options.h"
+#include "output.h"
+#include "rand64-hw.h"
+#include "rand64-sw.h"
+#include "mrand.h"
 
 /* Hardware implementation.  */
 
@@ -135,62 +137,171 @@ int
 main (int argc, char **argv)
 {
   /* Check arguments.  */
-  bool valid = false;
-  long long nbytes;
-  if (argc == 2)
+  // bool valid = false;
+  // long long nbytes;
+  // if (argc == 2)
+  //   {
+  //     char *endptr;
+  //     errno = 0;
+  //     nbytes = strtoll (argv[1], &endptr, 10);
+  //     if (errno)
+	// perror (argv[1]);
+  //     else
+	// valid = !*endptr && 0 <= nbytes;
+  //   }
+  // if (!valid)
+  //   {
+  //     fprintf (stderr, "%s: usage: %s NBYTES\n", argv[0], argv[0]);
+  //     return 1;
+  //   }
+
+  // /* Now that we know we have work to do, arrange to use the
+  //    appropriate library.  */
+  // void (*initialize) (void);
+  // unsigned long long (*rand64) (void);
+  // void (*finalize) (void);
+  // if (rdrand_supported ())
+  //   {
+  //     initialize = hardware_rand64_init;
+  //     rand64 = hardware_rand64;
+  //     finalize = hardware_rand64_fini;
+  //   }
+  // else
+  //   {
+  //     initialize = software_rand64_init;
+  //     rand64 = software_rand64;
+  //     finalize = software_rand64_fini;
+  //   }
+
+  // initialize ();
+  // int wordsize = sizeof rand64 ();
+  // int output_errno = 0;
+
+  // do
+  //   {
+  //     unsigned long long x = rand64 ();
+  //     int outbytes = nbytes < wordsize ? nbytes : wordsize;
+  //     if (!writebytes (x, outbytes))
+	// {
+	//   output_errno = errno;
+	//   break;
+	// }
+  //     nbytes -= outbytes;
+  //   }
+  // while (0 < nbytes);
+
+
+  struct options opt = {NULL, NULL, 0};
+  parseOptions(argc, argv, &opt);
+  
+    if (strcmp(opt.i,"rdrand") == 0 && rdrand_supported() == false)
     {
-      char *endptr;
-      errno = 0;
-      nbytes = strtoll (argv[1], &endptr, 10);
-      if (errno)
-	perror (argv[1]);
-      else
-	valid = !*endptr && 0 <= nbytes;
+        fprintf(stderr, "rdrand is unavailable: test failed\n"); 
+        exit(1);
     }
-  if (!valid)
-    {
-      fprintf (stderr, "%s: usage: %s NBYTES\n", argv[0], argv[0]);
-      return 1;
-    }
+    long long numbytes = opt.numbytes;
 
   /* If there's no work to do, don't worry about which library to use.  */
-  if (nbytes == 0)
+  if (numbytes == 0)
     return 0;
+
 
   /* Now that we know we have work to do, arrange to use the
      appropriate library.  */
-  void (*initialize) (void);
+  void (*initialize)(void);
+  void (*initializeToo)(char* filename);
   unsigned long long (*rand64) (void);
   void (*finalize) (void);
-  if (rdrand_supported ())
+  char* filename = opt.i;
+
+  if (strcmp(filename, "rdrand") == 0 && rdrand_supported ())
     {
       initialize = hardware_rand64_init;
       rand64 = hardware_rand64;
       finalize = hardware_rand64_fini;
+      initialize();
+
     }
-  else
+  else if(opt.i[0] == '/')
     {
-      initialize = software_rand64_init;
+      initializeToo = software_rand64_init;
       rand64 = software_rand64;
       finalize = software_rand64_fini;
+      initializeToo(filename);
     }
+  else if (strcmp(filename, "mrand48_r") == 0){
+      initialize = mrand_rand64_init;
+      rand64 = mrand_rand64;
+      finalize = mrand_rand64_fini;
+      initialize();
+  }
 
-  initialize ();
-  int wordsize = sizeof rand64 ();
+  int stringSize = sizeof rand64 ();
   int output_errno = 0;
 
-  do
+if (opt.o == NULL) {
+  //printf("got to inside of if statement\n");
+    do
     {
       unsigned long long x = rand64 ();
-      int outbytes = nbytes < wordsize ? nbytes : wordsize;
-      if (!writebytes (x, outbytes))
-	{
-	  output_errno = errno;
-	  break;
-	}
+      int outbytes = nbytes < stringSize ? nbytes : stringSize;
+      if (!writebytes(x, outbytes))
+	    { 
+          output_errno = errno;
+          break;
+	    }
       nbytes -= outbytes;
     }
   while (0 < nbytes);
+}
+else if (strcmp(opt.o, "stdio") == 0) {
+    do
+    {
+      unsigned long long x = rand64 ();
+      int outbytes = nbytes < stringSize ? nbytes : stringSize;
+      if (!writebytes(x, outbytes))
+	    { 
+          output_errno = errno;
+          break;
+	    }
+      nbytes -= outbytes;
+    }
+  while (0 < nbytes);
+}  
+else 
+{
+    int opttoint = atoi(opt.o);
+    int totalWritten = 0;
+    int requiredToWrite = nbytes;
+    int bufferSize = opttoint;
+    char* bufferSizeArray = malloc(bufferSize);
+    int currentArrayIndex = 0;
+
+    while (totalWritten < requiredToWrite)
+    {
+      int x = rand64();
+      if (totalWritten + bufferSize > requiredToWrite)
+      {
+        bufferSize = requiredToWrite - totalWritten;
+      }
+
+      while (x > 0 && currentArrayIndex < bufferSize)
+      {
+        bufferSizeArray[currentArrayIndex] = x;
+        x >>= 1;
+        currentArrayIndex++;
+      }
+
+      if (currentArrayIndex == bufferSize)
+      {
+        int bytesWritten = write(1, bufferSizeArray, bufferSize);
+        totalWritten += bytesWritten;
+      }
+    }
+    free(bufferSizeArray);
+}
+
+
 
   if (fclose (stdout) != 0)
     output_errno = errno;

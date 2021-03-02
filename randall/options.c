@@ -6,54 +6,69 @@
 #include <string.h>
 #include "./options.h"
 
+long long returnNumBytes(int argc, char** argv) {
+bool valid = false;           /* starts off false */
+  long long numbytes;
+      char *endptr;
+      errno = 0;
+      numbytes = strtoll (argv[1], &endptr, 10);
+      if (errno)
+	perror (argv[1]);
+      else
+	valid = !*endptr && 0 <= numbytes;
+
+  return numbytes;
+}
 
 /* Check arguments.  */
-void
-options_processing(int argc, char **argv, struct opts* opts) {
-  opts->valid = false;
-  opts->block_size = -1;
+void parseOptions(int argc, char **argv, struct opts* opt) {
+  opt->valid = false;
+  opt->block_size = -1;
   int c;
   while ((c = getopt(argc, argv, ":o:i:")) != -1) {
         switch(c) {
         case 'i':
             if(strcmp("rdrand", optarg) == 0) {
-              opts->input = RDRAND;
+              opt->i = RDRAND;
             }
             else if(strcmp("mrand48_r", optarg) == 0) {
-              opts->input = MRAND48_R;
+              opt->i = MRAND48_R;
             }
             else if('/' == optarg[0]) {
-              opts->input = SLASH_F;
-              opts->r_src = optarg;
+              opt->i = SLASH_F;
+              opt->r_src = optarg;
             }
             else {
               break;
             }
-            opts->valid = true;
+            opt->valid = true;
             break;
         case 'o':
-            if(strcmp("stdout", optarg) == 0) {
-              opts->output = STDOUT;
+            if(strcmp("stdio", optarg) == 0) {
+              opt->o = STDOUT;
             }
             else {
-              opts->output = N;           /* replace putchar with write */
-              opts->block_size = atoi(optarg);
+              opt->o = N;           /* replace putchar with write */
+              opt->block_size = atoi(optarg);
             }
-            opts->valid = true;
+            opt->valid = true;
             break;
-        case ':':       /* if there's a -f or -o without any operand whatsoever */
-            break;
-        case '?':
-           break;
-        }
+        default: exit(1);
   }
   
-  if (optind >= argc) {
-    return;
-  }
+      int index;
+      for (index = optind; index < argc; index++) {
+        int bytes = atoi(argv[index]);
+        opt->numbytes = bytes;      /* set numbytes to bytes*/
+      }
 
-  opts->nbytes = atol(argv[optind]);
-  if(opts->nbytes >= 0) {
-    opts->valid = true;
-  }
+      //make rdrand default if i isn't valid
+      if(opt->i == NULL && rdrand_supported())
+      {
+        opt->i = "rdrand";
+      }
+      else if (opt->i == NULL && !rdrand_supported())
+      {
+        opt->i = "/dev/random";
+      }
 }

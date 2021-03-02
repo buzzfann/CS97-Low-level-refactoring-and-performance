@@ -1,17 +1,22 @@
-#include <stdbool.h>
+#ifndef OPTIONS_H
+#define OPTIONS_H
+
+
 
 enum Input { RDRAND, MRAND48_R, SLASH_F };
 enum Output { STDOUT, N };
 
-struct opts
+struct opt
 { 
    bool valid;
    long long nbytes;
-   enum Input input;
-   char* r_src;
-   enum Output output;
+   char* o;
+   char* i;
+   // char* r_src;
    int block_size;
 };
 
-void
-options_processing(int argc, char **argv, struct opts* opts);
+long long returnNumBytes(int argc, char** argv);  
+void parseOptions(int argc, char **argv, struct options* opt);
+
+#endif /* options_h */
