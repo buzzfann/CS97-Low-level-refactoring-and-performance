@@ -30,31 +30,37 @@ TAREXT = txz
 
 default: randall
 
-randall: randall.c
-	$(CC) $(CFLAGS) $@.c -o $@
+randall: randall.c rand64-hw.o rand64-sw.o options.o output.o mrand.o
+	$(CC) $(CFLAGS) -o randall randall.c rand64-hw.o rand64-sw.o options.o output.o mrand.o 
+
+options.o: options.c options.h
+	$(CC) $(CFLAGS) -c options.c
+
+rand64-hw.o: rand64-hw.c rand64-hw.h
+	$(CC) $(CFLAGS) -c rand64-hw.c
+
+rand64-sw.o: rand64-sw.c rand64-sw.h
+	$(CC) $(CFLAGS) -c rand64-sw.c
+
+output.o: output.c output.h
+	$(CC) $(CFLAGS) -c output.c
+
+mrand.o: mrand.c mrand.h
+	$(CC) $(CFLAGS) -c mrand.c
 
 check: randall test_script.sh
-	./test_script.sh
+	./test_script.sh 
 
 assignment: randall-assignment.$(TAREXT)
-assignment-files = COPYING Makefile randall.c
+assignment-files = COPYING Makefile randall.c 
 randall-assignment.$(TAREXT): $(assignment-files)
 	$(TAR) $(TARFLAGS) -cf $@ $(assignment-files)
 
 submission: randall-submission.$(TAREXT)
 submission-files = $(assignment-files) \
-  notes.txt # More files should be listed here, as needed.
+  notes.txt mrand.c mrand.h options.c options.h output.c output.h rand64-hw.c rand64-hw.h rand64-sw.c rand64-sw.h
 randall-submission.$(TAREXT): $(submission-files)
 	$(TAR) $(TARFLAGS) -cf $@ $(submission-files)
-
-rand64-hw.o: rand64-hw.c rand64-hw.h
-	$(CC) $(CFLAGS) -c rand64-hw.c
-rand64-sw.o: rand64-sw.c rand64-sw.h
-	$(CC) $(CFLAGS) -c rand64-sw.c
-options.o: options.c options.h
-	$(CC) $(CFLAGS) -c options.c
-output.o: output.c output.h
-	$(CC) $(CFLAGS) -c output.c
 
 .PHONY: default clean assignment submission
 

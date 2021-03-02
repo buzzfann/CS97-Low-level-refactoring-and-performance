@@ -244,45 +244,45 @@ if (opt.o == NULL) {
     do
     {
       unsigned long long x = rand64 ();
-      int outbytes = nbytes < stringSize ? nbytes : stringSize;
+      int outbytes = numbytes < stringSize ? numbytes : stringSize;
       if (!writebytes(x, outbytes))
 	    { 
           output_errno = errno;
           break;
 	    }
-      nbytes -= outbytes;
+      numbytes -= outbytes;
     }
-  while (0 < nbytes);
+  while (0 < numbytes);
 }
 else if (strcmp(opt.o, "stdio") == 0) {
     do
     {
       unsigned long long x = rand64 ();
-      int outbytes = nbytes < stringSize ? nbytes : stringSize;
+      int outbytes = numbytes < stringSize ? numbytes : stringSize;
       if (!writebytes(x, outbytes))
 	    { 
           output_errno = errno;
           break;
 	    }
-      nbytes -= outbytes;
+      numbytes -= outbytes;
     }
-  while (0 < nbytes);
+  while (0 < numbytes);
 }  
 else 
 {
-    int opttoint = atoi(opt.o);
+
     int totalWritten = 0;
-    int requiredToWrite = nbytes;
-    int bufferSize = opttoint;
+    int necessaryWrite = numbytes;
+    int bufferSize = atoi(opt.o);
     char* bufferSizeArray = malloc(bufferSize);
     int currentArrayIndex = 0;
 
-    while (totalWritten < requiredToWrite)
+    while (totalWritten < necessaryWrite)
     {
       int x = rand64();
-      if (totalWritten + bufferSize > requiredToWrite)
+      if (totalWritten + bufferSize > necessaryWrite)
       {
-        bufferSize = requiredToWrite - totalWritten;
+        bufferSize = necessaryWrite - totalWritten;
       }
 
       while (x > 0 && currentArrayIndex < bufferSize)

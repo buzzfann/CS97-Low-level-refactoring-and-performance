@@ -6,14 +6,15 @@
 enum Input { RDRAND, MRAND48_R, SLASH_F };
 enum Output { STDOUT, N };
 
-struct opt
+struct options
 { 
-   bool valid;
-   long long nbytes;
-   char* o;
+   // bool valid;
    char* i;
-   // char* r_src;
-   int block_size;
+   char* o;
+   long long numbytes;
+
+
+   // int block_size;
 };
 
 long long returnNumBytes(int argc, char** argv);  

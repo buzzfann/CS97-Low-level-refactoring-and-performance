@@ -1,8 +1,64 @@
-What I first did was implement the shell script test_script.sh to make a simple test and implemented 
+What I initially did was run through randall.c and the Makefile to make sure that I understood the
+general concepts of every part of it.
+
+What I next did was implement the shell script test_script.sh to make a simple test and implemented 
 it in Makefile.
+check: randall test_script.sh
+	./test_script.sh
 
 When creating the new files, the first thing I did was look at options.c. Determining which parts of
 the code does output, I first decided to move writeBites() over as it outputs random
 bites. For rand64-hw.c I decided to move over cpuid and the other functions that had comments
 describing CPU's or other hardware components. For rand64-sw.c, I moved over all software related
-functions like 
+functions like. I also created an mrand file for the purpose of writing my mrand class. There was
+options.c, which didn't contain much initially but in which I added functionality for -o and -i through
+a parseOptions function that I created. This parseOptions function took in argv, argc, and a struct
+defined in options.h called opt.
+
+The way in which parseOptions was created was that it ran a while loop with a switch statement
+inside looking at both -i and -o. If it was -i, then it looked at rdrand, mrand48_r, and a "/".
+With -o, it looked at stdio and N. 
+
+I also created an mrand.c and mrand.h in order to make things more simple and clear. In these classes,
+I used the result of checking rdrand being in opt i from the main class, and put that into an if
+statement in the main class. If it wasn't functional, then an error message is printed. 
+
+I also added in more tests to test_script.sh to further test the program that I built.
+
+Results of test_script.sh:
+time dd if=/dev/urandom ibs=8192 obs=8192 count=16384 >/dev/null
+16384+0 records in
+16384+0 records out
+134217728 bytes (134 MB, 128 MiB) copied, 0.687988 s, 195 MB/s
+
+real    0m0.690s
+user    0m0.013s
+sys     0m0.676s
+
+time ./randall 133562368 >/dev/null
+
+real    0m10.555s
+user    0m0.002s
+sys     0m0.014s
+
+time ./randall 133562368 | cat >/dev/null
+
+real    0m6.061s
+user    0m0.002s
+sys     0m0.010s
+
+time ./randall -i /dev/urandom
+
+real    0m0.002s
+user    0m0.001s
+sys     0m0.000s
+
+time ./randall 133562368 >rand.data
+
+real    0m8.788s
+user    0m0.000s
+sys     0m0.014s
+
+
+
+

@@ -2,7 +2,7 @@
 #define RAND64SW_H
 extern char* rsrc;
 
-void software_rand64_init (void);
+void software_rand64_init (char* filename);
 
 unsigned long long software_rand64 (void);
 

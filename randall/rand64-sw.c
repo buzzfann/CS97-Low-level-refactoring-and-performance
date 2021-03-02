@@ -1,10 +1,20 @@
+#include <cpuid.h>
+#include <errno.h>
+#include <immintrin.h>
+#include <limits.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "rand64-sw.h"
+#include "options.h"
+
 /* Software implementation.  */
 
 /* Input stream containing random bytes.  */
 FILE *urandstream;
 
 /* Initialize the software rand64 implementation.  */
-void
+ void
 software_rand64_init (char* filename)
 {
   urandstream = fopen (filename, "r");
@@ -12,8 +22,9 @@ software_rand64_init (char* filename)
     abort ();
 }
 
+
 /* Return a random value, using software operations.  */
-unsigned long long
+ unsigned long long
 software_rand64 (void)
 {
   unsigned long long int x;
@@ -23,7 +34,7 @@ software_rand64 (void)
 }
 
 /* Finalize the software rand64 implementation.  */
-void
+ void
 software_rand64_fini (void)
 {
   fclose (urandstream);

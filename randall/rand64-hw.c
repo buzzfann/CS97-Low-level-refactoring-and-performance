@@ -1,14 +1,16 @@
-
+#include <cpuid.h>
+#include <errno.h>
 #include <immintrin.h>
-#include <stdio.h>
-#include <time.h>    
+#include <limits.h>
+#include <stdbool.h>
+//#include <stdio.h>
+#include <stdlib.h>
 #include "rand64-hw.h"
 
-/* Description of the current CPU.  */
-struct cpuid { unsigned eax, ebx, ecx, edx; };
+struct cpuid { unsigned eax, ebx, ecx, edx; }; 
 
 /* Return information about the CPU.  See <http://wiki.osdev.org/CPUID>.  */
-struct cpuid
+ struct cpuid
 cpuid (unsigned int leaf, unsigned int subleaf)
 {
   struct cpuid result;
@@ -17,24 +19,24 @@ cpuid (unsigned int leaf, unsigned int subleaf)
 	 "=c" (result.ecx), "=d" (result.edx)
        : "a" (leaf), "c" (subleaf));
   return result;
-}
+} 
 
 /* Return true if the CPU supports the RDRAND instruction.  */
-_Bool
+ _Bool
 rdrand_supported (void)
 {
   struct cpuid extended = cpuid (1, 0);
   return (extended.ecx & bit_RDRND) != 0;
-}
+} 
 
 /* Initialize the hardware rand64 implementation.  */
-void
+ void
 hardware_rand64_init (void)
 {
-}
+} 
 
 /* Return a random value, using hardware operations.  */
-unsigned long long
+ unsigned long long
 hardware_rand64 (void)
 {
   unsigned long long int x;
@@ -44,7 +46,7 @@ hardware_rand64 (void)
 }
 
 /* Finalize the hardware rand64 implementation.  */
-void
+ void
 hardware_rand64_fini (void)
 {
-}
+} 

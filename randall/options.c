@@ -1,68 +1,60 @@
+#include "options.h"
+#include "rand64-hw.h"
 #include <errno.h>
 #include <immintrin.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include "./options.h"
 
 long long returnNumBytes(int argc, char** argv) {
-bool valid = false;           /* starts off false */
   long long numbytes;
+  bool valid = false;
       char *endptr;
       errno = 0;
       numbytes = strtoll (argv[1], &endptr, 10);
       if (errno)
 	perror (argv[1]);
       else
-	valid = !*endptr && 0 <= numbytes;
-
+	valid = !*endptr && 0 <= numbytes;      /* change valid if it is valid */
   return numbytes;
 }
 
-/* Check arguments.  */
-void parseOptions(int argc, char **argv, struct opts* opt) {
-  opt->valid = false;
-  opt->block_size = -1;
-  int c;
-  while ((c = getopt(argc, argv, ":o:i:")) != -1) {
-        switch(c) {
-        case 'i':
-            if(strcmp("rdrand", optarg) == 0) {
-              opt->i = RDRAND;
-            }
-            else if(strcmp("mrand48_r", optarg) == 0) {
-              opt->i = MRAND48_R;
-            }
-            else if('/' == optarg[0]) {
-              opt->i = SLASH_F;
-              opt->r_src = optarg;
-            }
-            else {
-              break;
-            }
-            opt->valid = true;
-            break;
-        case 'o':
-            if(strcmp("stdio", optarg) == 0) {
-              opt->o = STDOUT;
-            }
-            else {
-              opt->o = N;           /* replace putchar with write */
-              opt->block_size = atoi(optarg);
-            }
-            opt->valid = true;
-            break;
-        default: exit(1);
-  }
+void parseOptions(int argc, char **argv, struct options* opt)
+{
+    int opt1;
+    while ((opt1 = getopt(argc, argv, "i:o:")) != -1) {
+      switch(opt1) {
+        case 'i':  
+          if(strcmp(optarg, "mrand48_r") == 0) {
+            opt->i = "mrand48_r";
+          }
+          else if (optarg[0] == '/') {
+            opt->i = optarg;
+          }
+          else {
+            opt->i = "rdrand";
+          } 
+          break; 
+        case 'o': 
+           if(strcmp(optarg, "stdio") == 0) {
+             opt->o = optarg;
+           } 
+           break;
+        default: exit(1);  /* if user inputs something unknown, return exit code */
+      }
   
+    }
+
       int index;
       for (index = optind; index < argc; index++) {
         int bytes = atoi(argv[index]);
-        opt->numbytes = bytes;      /* set numbytes to bytes*/
+        opt->numbytes = bytes;
       }
 
-      //make rdrand default if i isn't valid
+      //make rdrand default if -i is invalid
       if(opt->i == NULL && rdrand_supported())
       {
         opt->i = "rdrand";
