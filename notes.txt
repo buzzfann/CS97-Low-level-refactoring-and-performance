@@ -1,0 +1,8 @@
+What I first did was implement the shell script test_script.sh to make a simple test and implemented 
+it in Makefile.
+
+When creating the new files, the first thing I did was look at options.c. Determining which parts of
+the code does output, I first decided to move writeBites() over as it outputs random
+bites. For rand64-hw.c I decided to move over cpuid and the other functions that had comments
+describing CPU's or other hardware components. For rand64-sw.c, I moved over all software related
+functions like 
