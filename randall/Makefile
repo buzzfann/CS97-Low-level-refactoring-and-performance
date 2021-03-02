@@ -47,6 +47,15 @@ submission-files = $(assignment-files) \
 randall-submission.$(TAREXT): $(submission-files)
 	$(TAR) $(TARFLAGS) -cf $@ $(submission-files)
 
+rand64-hw.o: rand64-hw.c rand64-hw.h
+	$(CC) $(CFLAGS) -c rand64-hw.c
+rand64-sw.o: rand64-sw.c rand64-sw.h
+	$(CC) $(CFLAGS) -c rand64-sw.c
+options.o: options.c options.h
+	$(CC) $(CFLAGS) -c options.c
+output.o: output.c output.h
+	$(CC) $(CFLAGS) -c output.c
+
 .PHONY: default clean assignment submission
 
 clean:
